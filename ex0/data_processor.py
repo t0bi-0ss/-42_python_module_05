@@ -80,7 +80,8 @@ class TextProcessor(DataProcessor):
             if isinstance(data, list):
                 for item in data:
                     item + "abc"
-            data + "abc"
+            else:
+                data + "abc"
         except TypeError:
             print("Got exception: Improper text data")
         else:
@@ -151,3 +152,24 @@ if __name__ == "__main__":
             "Numeric value",
             f"{extracted[0]}: {extracted[1]}"
         )
+    print("\n>>>Additional tests<<<")
+    print("Trying to validate input [1, 'a', 3]:", num_processor.validate([1, 'a', 3]))
+    print("Test invalid ingestion of list [1, 'a', 3] without prior validation:")
+    num_processor.ingest([1, 'a', 3])
+    print("Extracting all values even when there's none")
+    for i in range(0, 5):
+        extracted = num_processor.ouput()
+        print(
+            "Numeric value",
+            f"{extracted[0]}: {extracted[1]}"
+        )
+    
+    print("---> Testing Text Processor...")
+    # Declare TextProcessor class object
+    text_processor = TextProcessor()
+    print("Trying to validate input '42':", text_processor.validate(42))
+    print("Processing data: ['Hello', 'Nexus', 'World']")
+    text_processor.ingest(['Hello', 'Nexus', 'World'])
+    print("Extracting 1 value...")
+    extracted = text_processor.ouput()
+    print(f"Text value {extracted[0]}: {extracted[1]}")
