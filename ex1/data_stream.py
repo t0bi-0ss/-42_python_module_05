@@ -155,16 +155,17 @@ class DataStream():
 
     def register_processor(self, proc: DataProcessor) -> None:
         if proc.__class__.__name__ in self._registered_processors.keys():
+            
             while True:
                 try:
                     answer: str = input(
-                        f"Warning: there's already a {proc.__class__.__name__} registered",
-                        "do you wish to overwrite it [y/n]:"
+                        f"Warning: there's already a {proc.__class__.__name__} "
+                        "registered do you wish to overwrite it [y/n]: "
                     )
                 except EOFError:
                     print(
                         "\nError: input stream was closed.",
-                        f"Cancelling {proc.__class.__name__} override"
+                        "Cancelling existing processor override"
                     )
                     return None
                 else:
@@ -174,6 +175,8 @@ class DataStream():
                     elif answer not in ["y", "n"]:
                         print(f"Error: action '{answer}' is not recognized")
                         continue
+                    else:
+                        break
         if isinstance(proc, NumericProcessor):
             self._registered_processors[proc.__class__.__name__] = proc
         elif isinstance(proc, TextProcessor):
@@ -201,8 +204,71 @@ class DataStream():
         """Prints stream statistics"""
 
         print("== DataStream statistics ==")
+        if len(self._registered_processors) == 0:
+            print("No processor found, no data")
+            return None
         for name, processor in self._registered_processors.items():
             print(
                 f"{name}: total {processor.get_processing_rank()} items processed,",
-                f"remaining {processor.remaining_data()}"
+                f"remaining {processor.remaining_data()} on processor"
             )
+
+    def consume_element(self, processor_name: str) -> tuple[int, str]:
+        """Consumes n elements from specified processor"""
+
+        if processor_name not in self._registered_processors.keys():
+            print(f"Error: processor '{processor_name}' is not registered")
+            return tuple()
+        else:
+            return self._registered_processors[processor_name].ouput()
+
+
+if __name__ == "__main__":
+    print("=== Code Nexus - Data Stream ===\n")
+
+    print("---> Initialize Data Stream...")
+    data_stream = DataStream()
+    data_stream.print_processor_stats()
+
+    print("\n---> Registering Numeric Processor")
+    data_stream.register_processor(NumericProcessor())
+    data_stream.print_processor_stats()
+
+    stream = [
+        'Hello world',
+        [3.14, -1, 2.71],
+        [{'log_level': 'WARNING', 'log_message': 'Telnet access! Use ssh instead'},
+         {'log_level': 'INFO', 'log_message': 'User wil is connected'}
+         ],
+         42,
+         ['Hi', 'five']
+        ]
+    print("\nSend first batch of data on stream:", stream)
+    data_stream.process_stream(stream)
+    print()
+    data_stream.print_processor_stats()
+
+    print("\n---> Registering other data processors")
+    data_stream.register_processor(TextProcessor())
+    data_stream.register_processor(LogProcessor())
+    
+    print("Send the same batch again")
+    data_stream.process_stream(stream)
+    print()
+    data_stream.print_processor_stats()
+
+    print("\n---> Consume some elements from the data processors: ", end="")
+    print("Numeric 3, Text 2, Log 1")
+    data_stream.consume_element("NumericProcessor")
+    data_stream.consume_element("NumericProcessor")
+    data_stream.consume_element("NumericProcessor")
+    data_stream.consume_element("TextProcessor")
+    data_stream.consume_element("TextProcessor")
+    data_stream.consume_element("LogProcessor")
+    data_stream.print_processor_stats()
+
+    print("\n>>>>Additional tests<<<<")
+    print("Trying to register an already registered processor")
+    data_stream.register_processor(NumericProcessor())
+    print()
+    data_stream.print_processor_stats()
