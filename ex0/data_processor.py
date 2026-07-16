@@ -210,3 +210,9 @@ if __name__ == "__main__":
         ]
     print("Test invalid ingestion of", to_process)
     log_processor.ingest(to_process)
+    to_process = [
+        {'log_level': 'NOTICE', 'log_message': 'Connection to server'},
+        {'log_level': 1, 'log_message': 'Unauthorized access!!'}
+        ]
+    print("Test invalid ingestion of", to_process)
+    log_processor.ingest(to_process)
