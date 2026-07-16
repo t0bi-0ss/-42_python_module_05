@@ -119,9 +119,15 @@ class LogProcessor(DataProcessor):
             if isinstance(data, list):
                 for item in data:
                     item.keys()
+                    for key, value in item.items():
+                        key + "abc"
+                        value + "abc"
             else:
                 data.keys()
-        except AttributeError:
+                for key, value in data.items():
+                    key + "abc"
+                    value + "abc"
+        except (TypeError, AttributeError):
             print("Got exception: Improper log data")
         else:
             if isinstance(data, list):
@@ -164,7 +170,7 @@ if __name__ == "__main__":
             f"{extracted[0]}: {extracted[1]}"
         )
     
-    print("---> Testing Text Processor...")
+    print("\n---> Testing Text Processor...")
     # Declare TextProcessor class object
     text_processor = TextProcessor()
     print("Trying to validate input '42':", text_processor.validate(42))
@@ -173,3 +179,34 @@ if __name__ == "__main__":
     print("Extracting 1 value...")
     extracted = text_processor.ouput()
     print(f"Text value {extracted[0]}: {extracted[1]}")
+    print("\n>>>Additional tests<<<")
+    print("Test invalid ingestion of list ['Hello', 'World', 1, 'Sup']:")
+    text_processor.ingest(['Hello', 'World', 1, 'Sup'])
+    print("Test invalid ingestion of list ['Hello', 'World', ['What'], 'Sup']:")
+    text_processor.ingest(['Hello', 'World', ['What'], 'Sup'])
+
+
+    print("\n---> Testing Log Processor...")
+    # Declare LogProcessor class object
+    log_processor = LogProcessor()
+    print("Trying to validate input 'Hello':", log_processor.validate("Hello"))
+    to_process = [
+        {'log_level': 'NOTICE', 'log_message': 'Connection to server'},
+        {'log_level': 'ERROR', 'log_message': 'Unauthorized access!!'}
+        ]
+    print("Processing data:", to_process)
+    log_processor.ingest(to_process)
+    print("Extracting 2 values...")
+    for i in range(0, 2):
+        extracted = log_processor.ouput()
+        print(
+            f"Log entry {extracted[0]}: {extracted[1]['log_level']}:",
+            extracted[1]['log_message']
+        )
+    print("\n>>>Additional tests<<<")
+    to_process = [
+        {'log_level': 'NOTICE', 'log_message': 'Connection to server'},
+        {1: 'ERROR', 'log_message': 'Unauthorized access!!'}
+        ]
+    print("Test invalid ingestion of", to_process)
+    log_processor.ingest(to_process)
