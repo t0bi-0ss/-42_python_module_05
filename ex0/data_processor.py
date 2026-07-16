@@ -8,16 +8,23 @@ from typing import Any
 class DataProcessor(ABC):
     """Abstract class for data processing"""
 
-    internal_data: list[tuple[int, Any]] = []
+    def __init__(self) -> None:
+        self._internal_data: list[tuple[int, Any]] = []
+        self._processing_rank = 0
 
     @abstractmethod
     def ingest(self, data: Any) -> None:
+        """Processes input data"""
         pass
 
     @abstractmethod
     def validate(self, data: Any) -> bool:
+        """Checks if input data is appropiate"""
         pass
 
-    @classmethod
     def ouput(self) -> tuple[int, str]:
-
+        """Outputs ingested data"""
+        if len(self._internal_data) > 0:
+            return self._internal_data.pop(0)
+        else:
+            return -1, "Internal data is empty"
