@@ -27,7 +27,7 @@ class DataProcessor(ABC):
         if len(self._internal_data) > 0:
             return self._internal_data.pop(0)
         else:
-            return -1, "Internal data is empty"
+            return -1, "No data: Internal data is empty"
         
         
 class NumericProcessor(DataProcessor):
@@ -106,4 +106,15 @@ class LogProcessor(DataProcessor):
         else:
             return False
         
-    def ingest()
+    def ingest(self, data: dict[str, str] | list[dict[str, str]]) -> None:
+        try:
+            if isinstance(data, list):
+                for item in data:
+                    item.keys()
+            else:
+                data.keys()
+        except AttributeError:
+            print("Got exception: Improper log data")
+        else:
+            self._internal_data.append(self._processing_rank, data)
+            self._processing_rank += 1
