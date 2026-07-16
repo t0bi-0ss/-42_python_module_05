@@ -54,10 +54,12 @@ class NumericProcessor(DataProcessor):
             print("Got exception: Improper numeric data")
         else:
             if isinstance(data, list):
-                self._internal_data.append((self._processing_rank, [str(item) for item in data]))
+                for item in data:
+                    self._internal_data.append((self._processing_rank, str(item)))
+                    self._processing_rank += 1
             else:
                 self._internal_data.append((self._processing_rank, str(data)))
-            self._processing_rank += 1
+                self._processing_rank += 1
 
 
 class TextProcessor(DataProcessor):
@@ -82,8 +84,13 @@ class TextProcessor(DataProcessor):
         except TypeError:
             print("Got exception: Improper text data")
         else:
-            self._internal_data.append((self._processing_rank, data))
-            self._processing_rank += 1
+            if isinstance(data, list):
+                for string in data:
+                    self._internal_data.append((self._processing_rank, string))
+                    self._processing_rank += 1
+            else:
+                self._internal_data.append((self._processing_rank, data))
+                self._processing_rank += 1
 
 
 class LogProcessor(DataProcessor):
@@ -116,5 +123,31 @@ class LogProcessor(DataProcessor):
         except AttributeError:
             print("Got exception: Improper log data")
         else:
-            self._internal_data.append(self._processing_rank, data)
-            self._processing_rank += 1
+            if isinstance(data, list):
+                for item in data:
+                    self._internal_data.append((self._processing_rank, item))
+                    self._processing_rank += 1
+            else:
+                self._internal_data.append(self._processing_rank, data)
+                self._processing_rank += 1
+
+
+if __name__ == "__main__":
+    print("=== Code Nexus - Data processor ===\n")
+
+    print("---> Testing Numeric Processor...")
+    # Declare NumericProcessor class object
+    num_processor = NumericProcessor()
+    print("Trying to validate input '42':", num_processor.validate("42"))
+    print("Trying to validate input 'Hello':", num_processor.validate("Hello"))
+    print("Test invalid ingestion of string 'foo' without prior validation:")
+    num_processor.ingest("foo")
+    print("Processing data: [1, 2, 3, 4, 5]")
+    num_processor.ingest([1, 2, 3, 4, 5])
+    print("Extracting 3 values...")
+    for i in range(0, 3):
+        extracted = num_processor.ouput()
+        print(
+            "Numeric value",
+            f"{extracted[0]}: {extracted[1]}"
+        )
