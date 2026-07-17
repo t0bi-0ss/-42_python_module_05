@@ -27,9 +27,9 @@ class DataProcessor(ABC):
         if len(self._internal_data) > 0:
             return self._internal_data.pop(0)
         else:
-            return -1, "No data: Internal data is empty"
-        
-        
+            return (-1, "No data: Internal data is empty")
+
+
 class NumericProcessor(DataProcessor):
     """DataProcessor subclass for numeric data processing"""
 
@@ -42,7 +42,7 @@ class NumericProcessor(DataProcessor):
             return True
         else:
             return False
-        
+
     def ingest(self, data: int | float | list[int | float]) -> None:
         try:
             if isinstance(data, list):
@@ -55,7 +55,9 @@ class NumericProcessor(DataProcessor):
         else:
             if isinstance(data, list):
                 for item in data:
-                    self._internal_data.append((self._processing_rank, str(item)))
+                    self._internal_data.append(
+                        (self._processing_rank, str(item))
+                    )
                     self._processing_rank += 1
             else:
                 self._internal_data.append((self._processing_rank, str(data)))
@@ -74,7 +76,7 @@ class TextProcessor(DataProcessor):
             return True
         else:
             return False
-        
+
     def ingest(self, data: str | list[str]) -> None:
         try:
             if isinstance(data, list):
@@ -113,7 +115,7 @@ class LogProcessor(DataProcessor):
             return True
         else:
             return False
-        
+
     def ingest(self, data: dict[str, str] | list[dict[str, str]]) -> None:
         try:
             if isinstance(data, list):
@@ -159,8 +161,14 @@ if __name__ == "__main__":
             f"{extracted[0]}: {extracted[1]}"
         )
     print("\n>>>Additional tests<<<")
-    print("Trying to validate input [1, 'a', 3]:", num_processor.validate([1, 'a', 3]))
-    print("Test invalid ingestion of list [1, 'a', 3] without prior validation:")
+    print(
+        "Trying to validate input [1, 'a', 3]:",
+        num_processor.validate([1, 'a', 3])
+    )
+    print(
+        "Test invalid ingestion of list [1, 'a', 3] "
+        "without prior validation:"
+    )
     num_processor.ingest([1, 'a', 3])
     print("Extracting all values even when there's none")
     for i in range(0, 5):
@@ -169,7 +177,7 @@ if __name__ == "__main__":
             "Numeric value",
             f"{extracted[0]}: {extracted[1]}"
         )
-    
+
     print("\n---> Testing Text Processor...")
     # Declare TextProcessor class object
     text_processor = TextProcessor()
@@ -182,9 +190,11 @@ if __name__ == "__main__":
     print("\n>>>Additional tests<<<")
     print("Test invalid ingestion of list ['Hello', 'World', 1, 'Sup']:")
     text_processor.ingest(['Hello', 'World', 1, 'Sup'])
-    print("Test invalid ingestion of list ['Hello', 'World', ['What'], 'Sup']:")
+    print(
+        "Test invalid ingestion of "
+        "list ['Hello', 'World', ['What'], 'Sup']:"
+    )
     text_processor.ingest(['Hello', 'World', ['What'], 'Sup'])
-
 
     print("\n---> Testing Log Processor...")
     # Declare LogProcessor class object
@@ -193,7 +203,7 @@ if __name__ == "__main__":
     to_process = [
         {'log_level': 'NOTICE', 'log_message': 'Connection to server'},
         {'log_level': 'ERROR', 'log_message': 'Unauthorized access!!'}
-        ]
+    ]
     print("Processing data:", to_process)
     log_processor.ingest(to_process)
     print("Extracting 2 values...")
@@ -207,12 +217,12 @@ if __name__ == "__main__":
     to_process = [
         {'log_level': 'NOTICE', 'log_message': 'Connection to server'},
         {1: 'ERROR', 'log_message': 'Unauthorized access!!'}
-        ]
+    ]
     print("Test invalid ingestion of", to_process)
     log_processor.ingest(to_process)
     to_process = [
         {'log_level': 'NOTICE', 'log_message': 'Connection to server'},
         {'log_level': 1, 'log_message': 'Unauthorized access!!'}
-        ]
+    ]
     print("Test invalid ingestion of", to_process)
     log_processor.ingest(to_process)

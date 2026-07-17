@@ -28,11 +28,11 @@ class DataProcessor(ABC):
             return self._internal_data.pop(0)
         else:
             return (-1, "No data: Internal data is empty")
-    
+
     def get_processing_rank(self) -> int:
         """Returns current processing rank"""
         return self._processing_rank
-    
+
     def remaining_data(self) -> int:
         """Returns remaining elements in storage number"""
         return len(self._internal_data)
@@ -52,7 +52,7 @@ class NumericProcessor(DataProcessor):
                 return False
         else:
             return False
-        
+
     def ingest(self, data: int | float | list[int | float]) -> None:
         try:
             if isinstance(data, list):
@@ -65,7 +65,9 @@ class NumericProcessor(DataProcessor):
         else:
             if isinstance(data, list):
                 for item in data:
-                    self._internal_data.append((self._processing_rank, str(item)))
+                    self._internal_data.append(
+                        (self._processing_rank, str(item))
+                    )
                     self._processing_rank += 1
             else:
                 self._internal_data.append((self._processing_rank, str(data)))
@@ -86,7 +88,7 @@ class TextProcessor(DataProcessor):
                 return False
         else:
             return False
-        
+
     def ingest(self, data: str | list[str]) -> None:
         try:
             if isinstance(data, list):
@@ -125,7 +127,7 @@ class LogProcessor(DataProcessor):
             return True
         else:
             return False
-        
+
     def ingest(self, data: dict[str, str] | list[dict[str, str]]) -> None:
         try:
             if isinstance(data, list):
@@ -160,11 +162,12 @@ class DataStream():
 
     def register_processor(self, proc: DataProcessor) -> None:
         if proc.__class__.__name__ in self._registered_processors.keys():
-            
+
             while True:
                 try:
                     answer: str = input(
-                        f"Warning: there's already a {proc.__class__.__name__} "
+                        "Warning: there's already a "
+                        f"{proc.__class__.__name__} "
                         "registered do you wish to overwrite it [y/n]: "
                     )
                 except EOFError:
@@ -188,7 +191,7 @@ class DataStream():
             self._registered_processors[proc.__class__.__name__] = proc
         elif isinstance(proc, LogProcessor):
             self._registered_processors[proc.__class__.__name__] = proc
-        
+
     def process_stream(self, stream: list[Any]) -> None:
         """Analyzes each received element
         and sends it to the appropiate registered data processor"""
@@ -214,7 +217,8 @@ class DataStream():
             return None
         for name, processor in self._registered_processors.items():
             print(
-                f"{name}: total {processor.get_processing_rank()} items processed,",
+                f"{name}: total {processor.get_processing_rank()}"
+                " items processed, "
                 f"remaining {processor.remaining_data()} on processor"
             )
 
@@ -222,7 +226,9 @@ class DataStream():
         """Consumes n elements from specified processor"""
 
         if processor_name not in self._registered_processors.keys():
-            return (-1, f"Error: processor '{processor_name}' is not registered")
+            return (
+                -1, f"Error: processor '{processor_name}' is not registered"
+            )
         else:
             return self._registered_processors[processor_name].output()
 
@@ -241,12 +247,14 @@ if __name__ == "__main__":
     stream = [
         'Hello world',
         [3.14, -1, 2.71],
-        [{'log_level': 'WARNING', 'log_message': 'Telnet access! Use ssh instead'},
+        [{'log_level': 'WARNING',
+          'log_message': 'Telnet access! Use ssh instead'
+          },
          {'log_level': 'INFO', 'log_message': 'User wil is connected'}
          ],
-         42,
-         ['Hi', 'five']
-        ]
+        42,
+        ['Hi', 'five']
+    ]
     print("\nSend first batch of data on stream:", stream)
     data_stream.process_stream(stream)
     print()
@@ -255,7 +263,7 @@ if __name__ == "__main__":
     print("\n---> Registering other data processors")
     data_stream.register_processor(TextProcessor())
     data_stream.register_processor(LogProcessor())
-    
+
     print("Send the same batch again")
     data_stream.process_stream(stream)
     print()
