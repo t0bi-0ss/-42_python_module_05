@@ -120,7 +120,10 @@ class LogProcessor(DataProcessor):
         try:
             if isinstance(data, list):
                 for item in data:
-                    self.ingest(item)
+                    item.keys()
+                    for key, value in item.items():
+                        key + "abc"
+                        value + "abc"
             else:
                 data.keys()
                 for key, value in data.items():
