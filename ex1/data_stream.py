@@ -22,31 +22,34 @@ class DataProcessor(ABC):
         """Checks if input data is appropiate"""
         pass
 
-    def ouput(self) -> tuple[int, str]:
+    def output(self) -> tuple[int, str]:
         """Outputs ingested data"""
         if len(self._internal_data) > 0:
             return self._internal_data.pop(0)
         else:
-            return -1, "No data: Internal data is empty"
+            return (-1, "No data: Internal data is empty")
     
-    def get_processing_rank(self):
+    def get_processing_rank(self) -> int:
         """Returns current processing rank"""
         return self._processing_rank
     
-    def remaining_data(self):
+    def remaining_data(self) -> int:
         """Returns remaining elements in storage number"""
         return len(self._internal_data)
+
 
 class NumericProcessor(DataProcessor):
     """DataProcessor subclass for numeric data processing"""
 
     def validate(self, data: Any) -> bool:
         if isinstance(data, (int, float, list)):
-            if isinstance(data, list):
+            if data and isinstance(data, list):
                 for item in data:
                     if not isinstance(item, (int, float)):
                         return False
-            return True
+                return True
+            else:
+                return False
         else:
             return False
         
@@ -74,11 +77,13 @@ class TextProcessor(DataProcessor):
 
     def validate(self, data: Any) -> bool:
         if isinstance(data, (str, list)):
-            if isinstance(data, list):
+            if data and isinstance(data, list):
                 for item in data:
                     if not isinstance(item, str):
                         return False
-            return True
+                return True
+            else:
+                return False
         else:
             return False
         
@@ -105,7 +110,7 @@ class LogProcessor(DataProcessor):
     """DataProcessor subclass for log data processing"""
 
     def validate(self, data: Any) -> bool:
-        if isinstance(data, dict):
+        if data and isinstance(data, dict):
             for key in data.keys():
                 if not isinstance(key, str):
                     return False
@@ -113,7 +118,7 @@ class LogProcessor(DataProcessor):
                 if not isinstance(value, str):
                     return False
             return True
-        if isinstance(data, list):
+        if data and isinstance(data, list):
             for item in data:
                 if not isinstance(item, dict) or not self.validate(item):
                     return False
@@ -142,7 +147,7 @@ class LogProcessor(DataProcessor):
                     self._internal_data.append((self._processing_rank, item))
                     self._processing_rank += 1
             else:
-                self._internal_data.append(self._processing_rank, data)
+                self._internal_data.append((self._processing_rank, data))
                 self._processing_rank += 1
 
 
@@ -150,7 +155,7 @@ class DataStream():
     """Can register different types of DataProcessors and
     routes received stream of data to the appropiate one"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._registered_processors: dict[str, DataProcessor] = {}
 
     def register_processor(self, proc: DataProcessor) -> None:
@@ -170,7 +175,7 @@ class DataStream():
                     return None
                 else:
                     if answer == "n":
-                        print(f"Cancelling {proc.__class.__name__} override")
+                        print(f"Cancelling {proc.__class__.__name__} override")
                         return None
                     elif answer not in ["y", "n"]:
                         print(f"Error: action '{answer}' is not recognized")
@@ -200,7 +205,7 @@ class DataStream():
                     element
                 )
 
-    def print_processor_stats(self) -> None:
+    def print_processors_stats(self) -> None:
         """Prints stream statistics"""
 
         print("== DataStream statistics ==")
@@ -217,10 +222,9 @@ class DataStream():
         """Consumes n elements from specified processor"""
 
         if processor_name not in self._registered_processors.keys():
-            print(f"Error: processor '{processor_name}' is not registered")
-            return tuple()
+            return (-1, f"Error: processor '{processor_name}' is not registered")
         else:
-            return self._registered_processors[processor_name].ouput()
+            return self._registered_processors[processor_name].output()
 
 
 if __name__ == "__main__":
@@ -228,11 +232,11 @@ if __name__ == "__main__":
 
     print("---> Initialize Data Stream...")
     data_stream = DataStream()
-    data_stream.print_processor_stats()
+    data_stream.print_processors_stats()
 
     print("\n---> Registering Numeric Processor")
     data_stream.register_processor(NumericProcessor())
-    data_stream.print_processor_stats()
+    data_stream.print_processors_stats()
 
     stream = [
         'Hello world',
@@ -246,7 +250,7 @@ if __name__ == "__main__":
     print("\nSend first batch of data on stream:", stream)
     data_stream.process_stream(stream)
     print()
-    data_stream.print_processor_stats()
+    data_stream.print_processors_stats()
 
     print("\n---> Registering other data processors")
     data_stream.register_processor(TextProcessor())
@@ -255,7 +259,7 @@ if __name__ == "__main__":
     print("Send the same batch again")
     data_stream.process_stream(stream)
     print()
-    data_stream.print_processor_stats()
+    data_stream.print_processors_stats()
 
     print("\n---> Consume some elements from the data processors: ", end="")
     print("Numeric 3, Text 2, Log 1")
@@ -265,10 +269,10 @@ if __name__ == "__main__":
     data_stream.consume_element("TextProcessor")
     data_stream.consume_element("TextProcessor")
     data_stream.consume_element("LogProcessor")
-    data_stream.print_processor_stats()
+    data_stream.print_processors_stats()
 
     print("\n>>>>Additional tests<<<<")
     print("Trying to register an already registered processor")
     data_stream.register_processor(NumericProcessor())
     print()
-    data_stream.print_processor_stats()
+    data_stream.print_processors_stats()
