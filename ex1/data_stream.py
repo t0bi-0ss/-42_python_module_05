@@ -136,6 +136,7 @@ class LogProcessor(DataProcessor):
                     for key, value in item.items():
                         key + "abc"
                         value + "abc"
+                    self.ingest(item)
             else:
                 data.keys()
                 for key, value in data.items():
@@ -144,12 +145,10 @@ class LogProcessor(DataProcessor):
         except (TypeError, AttributeError):
             print("Got exception: Improper log data")
         else:
-            if isinstance(data, list):
-                for item in data:
-                    self._internal_data.append((self._processing_rank, item))
-                    self._processing_rank += 1
-            else:
-                self._internal_data.append((self._processing_rank, data))
+            if isinstance(data, dict):
+                message: str = (f"{data.get('log_level')}: "
+                                f"{data.get('log_message')}")
+                self._internal_data.append((self._processing_rank, message))
                 self._processing_rank += 1
 
 
