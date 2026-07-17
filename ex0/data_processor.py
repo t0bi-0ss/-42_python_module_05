@@ -51,7 +51,7 @@ class NumericProcessor(DataProcessor):
             else:
                 int(data)
         except (ValueError, TypeError):
-            print("Got exception: Improper numeric data")
+            print(f"Got exception: Improper numeric data -> {data}")
         else:
             if isinstance(data, list):
                 for item in data:
@@ -85,7 +85,7 @@ class TextProcessor(DataProcessor):
             else:
                 data + "abc"
         except TypeError:
-            print("Got exception: Improper text data")
+            print(f"Got exception: Improper text data -> {data}")
         else:
             if isinstance(data, list):
                 for string in data:
@@ -120,24 +120,19 @@ class LogProcessor(DataProcessor):
         try:
             if isinstance(data, list):
                 for item in data:
-                    item.keys()
-                    for key, value in item.items():
-                        key + "abc"
-                        value + "abc"
+                    self.ingest(item)
             else:
                 data.keys()
                 for key, value in data.items():
                     key + "abc"
                     value + "abc"
         except (TypeError, AttributeError):
-            print("Got exception: Improper log data")
+            print(f"Got exception: Improper log data -> {data}")
         else:
-            if isinstance(data, list):
-                for item in data:
-                    self._internal_data.append((self._processing_rank, item))
-                    self._processing_rank += 1
-            else:
-                self._internal_data.append(self._processing_rank, data)
+            if isinstance(data, dict):
+                message: str = (f"{data.get('log_level')}: "
+                                f"{data.get('log_message')}")
+                self._internal_data.append((self._processing_rank, message))
                 self._processing_rank += 1
 
 
@@ -210,8 +205,7 @@ if __name__ == "__main__":
     for i in range(0, 2):
         extracted = log_processor.ouput()
         print(
-            f"Log entry {extracted[0]}: {extracted[1]['log_level']}:",
-            extracted[1]['log_message']
+            f"Log entry {extracted[0]}: {extracted[1]}"
         )
     print("\n>>>Additional tests<<<")
     to_process = [
