@@ -124,6 +124,7 @@ class LogProcessor(DataProcessor):
                     for key, value in item.items():
                         key + "abc"
                         value + "abc"
+                    self.ingest(item)
             else:
                 data.keys()
                 for key, value in data.items():
