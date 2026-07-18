@@ -49,7 +49,7 @@ class NumericProcessor(DataProcessor):
                         return False
                 return True
             else:
-                return False
+                return True
         else:
             return False
 
@@ -85,7 +85,7 @@ class TextProcessor(DataProcessor):
                         return False
                 return True
             else:
-                return False
+                return True
         else:
             return False
 
