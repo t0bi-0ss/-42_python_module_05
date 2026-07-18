@@ -251,13 +251,14 @@ class DataStream():
             final_num = diff if diff >= 0 else 0
             while len(processor._internal_data) != final_num:
                 data_list.append(self.consume_element(name))
-            plugin.process_output(self, data_list)
+            plugin.process_output(data_list)
 
 
 class CsvPlugin():
     """Exports data in CSV format"""
 
-    def process_output(self, data: list[tuple[int, str]]) -> None:
+    @staticmethod
+    def process_output(data: list[tuple[int, str]]) -> None:
         print("CSV Output:")
         for element in data:
             print(f"{element[1]}", end="")
@@ -269,7 +270,8 @@ class CsvPlugin():
 class JsonPlugin():
     """Exports data in JSON format"""
 
-    def process_output(self, data: list[tuple[int, str]]) -> None:
+    @staticmethod
+    def process_output(data: list[tuple[int, str]]) -> None:
         print("JSON Output:")
         for element in data:
             if element == data[0]:
