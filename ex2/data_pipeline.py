@@ -241,7 +241,7 @@ class DataStream():
     def output_pipeline(self, nb: int, plugin: ExportPlugin) -> None:
         """Consumes 'nb' elements from all registered data processors
         and exports them using the provided compatible plugin"""
-        
+
         if nb < 0:
             print("Error: nb can't be negative")
             return None
