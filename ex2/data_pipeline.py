@@ -56,7 +56,7 @@ class NumericProcessor(DataProcessor):
                         return False
                 return True
             else:
-                return False
+                return True
         else:
             return False
 
@@ -92,7 +92,7 @@ class TextProcessor(DataProcessor):
                         return False
                 return True
             else:
-                return False
+                return True
         else:
             return False
 
@@ -248,13 +248,14 @@ class DataStream():
             final_num = diff if diff >= 0 else 0
             while len(processor._internal_data) != final_num:
                 data_list.append(self.consume_element(name))
-            plugin(data_list)
+            plugin.process_output(self, data_list)
 
 
 class CsvPlugin():
     """Exports data in CSV format"""
 
     def process_output(self, data: list[tuple[int, str]]) -> None:
+        print("CSV Output:")
         for element in data:
             print(f"{element[1]}", end="")
             if element != data[-1]:
@@ -266,6 +267,7 @@ class JsonPlugin():
     """Exports data in JSON format"""
 
     def process_output(self, data: list[tuple[int, str]]) -> None:
+        print("JSON Output:")
         for element in data:
             if element == data[0]:
                 print("{", end="")
@@ -302,4 +304,33 @@ if __name__ == "__main__":
     print("\nSend first batch of data on stream:", stream)
     data_stream.process_stream(stream)
     print()
+    data_stream.print_processors_stats()
+
+    print("\nSend 3 processed data from each processor to a CSV plugin:")
+    data_stream.output_pipeline(3, CsvPlugin)
+
+    print()
+    data_stream.print_processors_stats()
+
+    stream = [
+        21,
+        ['I love AI', 'LLMs are wonderful', 'Stay healthy'],
+        [
+            {'log_level': 'ERROR', 'log_message': '500 server crash'},
+            {'log_level': 'NOTICE',
+             'log_message': 'Certificate expires in 10 days'
+             }
+        ],
+        [32, 42, 64, 84, 128, 168],
+        'World hello']
+    print("\nSend another batch of data:", stream)
+    data_stream.process_stream(stream)
+    print()
+
+    data_stream.print_processors_stats()
+
+    print("\nSend 5 processed data from each processor to a JSON plugin:")
+    data_stream.output_pipeline(5, JsonPlugin)
+    print()
+
     data_stream.print_processors_stats()
