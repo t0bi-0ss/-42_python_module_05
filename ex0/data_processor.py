@@ -149,6 +149,9 @@ if __name__ == "__main__":
     print("Trying to validate input '42':", num_processor.validate("42"))
     print("Trying to validate input 'Hello':", num_processor.validate("Hello"))
     print("Test invalid ingestion of string 'foo' without prior validation:")
+
+    # Mypy will detect an error because it
+    # expects int | list[int] and this has str
     num_processor.ingest("foo")
     print("Processing data: [1, 2, 3, 4, 5]")
     num_processor.ingest([1, 2, 3, 4, 5])
@@ -160,6 +163,9 @@ if __name__ == "__main__":
             f"{extracted[0]}: {extracted[1]}"
         )
     print("\n>>>Additional tests<<<")
+
+    # Mypy will detect an error because it
+    # expects list[int] and this has list[str]
     print(
         "Trying to validate input [1, 'a', 3]:",
         num_processor.validate([1, 'a', 3])
@@ -187,15 +193,22 @@ if __name__ == "__main__":
     extracted = text_processor.ouput()
     print(f"Text value {extracted[0]}: {extracted[1]}")
     print("\n>>>Additional tests<<<")
+
+    # Mypy will detect an error because it
+    # expects list[str] and this has list[int]
     print("Test invalid ingestion of list ['Hello', 'World', 1, 'Sup']:")
     text_processor.ingest(['Hello', 'World', 1, 'Sup'])
     print(
         "Test invalid ingestion of "
         "list ['Hello', 'World', ['What'], 'Sup']:"
     )
+
+    # Mypy will detect an error because it
+    # expects list[str] and this has list[list[str]]
     text_processor.ingest(['Hello', 'World', ['What'], 'Sup'])
 
     print("\n---> Testing Log Processor...")
+
     # Declare LogProcessor class object
     log_processor = LogProcessor()
     print("Trying to validate input 'Hello':", log_processor.validate("Hello"))
@@ -212,12 +225,19 @@ if __name__ == "__main__":
             f"Log entry {extracted[0]}: {extracted[1]}"
         )
     print("\n>>>Additional tests<<<")
+
+    # Mypy will detect an error because it
+    # expects list[dict[str, str]] and this has dict[int, str]
     to_process = [
         {'log_level': 'NOTICE', 'log_message': 'Connection to server'},
         {1: 'ERROR', 'log_message': 'Unauthorized access!!'}
     ]
+
     print("Test invalid ingestion of", to_process)
     log_processor.ingest(to_process)
+
+    # Mypy will detect an error because it
+    # expects list[dict[str, str]] and this has dict[int, str]
     to_process = [
         {'log_level': 'NOTICE', 'log_message': 'Connection to server'},
         {'log_level': 1, 'log_message': 'Unauthorized access!!'}
